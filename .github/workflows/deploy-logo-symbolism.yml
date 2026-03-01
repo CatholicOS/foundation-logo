@@ -1,0 +1,93 @@
+name: Deploy Logo Symbolism to WordPress
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    name: Convert & publish logo symbolism
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install pandoc
+        uses: pandoc/actions/setup@v1
+
+      - name: Convert Markdown to HTML fragment
+        run: pandoc 'CDCF Logo Symbolism.md' --wrap=none -f markdown -t html5 -o logo-symbolism.html
+
+      - name: Deploy to WordPress
+        id: deploy
+        env:
+          WP_REST_URL: ${{ secrets.WP_REST_URL }}
+          WP_APP_USERNAME: ${{ secrets.WP_APP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+        run: |
+          HTML_CONTENT=$(cat logo-symbolism.html)
+
+          # Check if a page with slug "logo-symbolism" already exists
+          EXISTING=$(curl -s \
+            -u "$WP_APP_USERNAME:$WP_APP_PASSWORD" \
+            "$WP_REST_URL/wp/v2/pages?slug=logo-symbolism&status=publish,draft")
+
+          PAGE_ID=$(echo "$EXISTING" | jq -r '.[0].id // empty')
+
+          PAYLOAD=$(jq -n \
+            --arg title "Logo Symbolism" \
+            --arg slug "logo-symbolism" \
+            --arg content "$HTML_CONTENT" \
+            '{title: $title, slug: $slug, content: $content, status: "publish"}')
+
+          if [ -n "$PAGE_ID" ] && [ "$PAGE_ID" != "null" ]; then
+            echo "Updating existing page (ID: $PAGE_ID)..."
+            RESPONSE=$(curl -s -f -X POST \
+              -u "$WP_APP_USERNAME:$WP_APP_PASSWORD" \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD" \
+              "$WP_REST_URL/wp/v2/pages/$PAGE_ID")
+          else
+            echo "Creating new page..."
+            RESPONSE=$(curl -s -f -X POST \
+              -u "$WP_APP_USERNAME:$WP_APP_PASSWORD" \
+              -H "Content-Type: application/json" \
+              -d "$PAYLOAD" \
+              "$WP_REST_URL/wp/v2/pages")
+            PAGE_ID=$(echo "$RESPONSE" | jq -r '.id')
+          fi
+
+          echo "page_id=$PAGE_ID" >> "$GITHUB_OUTPUT"
+          echo ""
+          echo "Deployed logo symbolism to WordPress (page ID: $PAGE_ID)."
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: 'npm'
+
+      - name: Install npm dependencies
+        run: npm ci
+
+      - name: Build standalone HTML and PDF
+        run: |
+          npm run build:html:standalone
+          npm run build:pdf
+
+      - name: Create GitHub release with PDF and standalone HTML
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          gh release create "$TAG" \
+            --title "Logo Symbolism $TAG" \
+            --notes "Official logo symbolism of the Catholic Digital Commons Foundation, $TAG." \
+            dist/logo-symbolism-standalone.html \
+            dist/logo-symbolism.pdf

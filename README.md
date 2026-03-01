@@ -1,6 +1,7 @@
 # Catholic Digital Commons Foundation — Logo Symbolism
 
-This repository contains the **official description of the symbolism and conceptual imagery of the Catholic Digital Commons Foundation logo**, maintained as a version-controlled public record.
+This repository contains the **official description of the symbolism and conceptual imagery of the Catholic Digital Commons Foundation logo**, maintained as a version-controlled
+public record.
 
 The authoritative text is located in [`CDCF Logo Symbolism.md`](./CDCF%20Logo%20Symbolism.md).
 
@@ -8,15 +9,15 @@ The authoritative text is located in [`CDCF Logo Symbolism.md`](./CDCF%20Logo%20
 
 ## Why the logo symbolism lives in Git
 
-The Catholic Digital Commons Foundation exists to steward shared digital goods with clarity, accountability, and continuity.
-Maintaining the official description of the Foundation's logo in a Git repository directly serves that mission.
+The Catholic Digital Commons Foundation exists to steward shared digital goods with clarity, accountability, and continuity. Maintaining the official description of the
+Foundation's logo in a Git repository directly serves that mission.
 
 Version control provides:
 
 ### 1. Transparency
 
-All changes to the logo's symbolic description are publicly visible, attributable, and reviewable.
-There are no silent edits and no ambiguity about how the Foundation articulates the meaning of its visual identity.
+All changes to the logo's symbolic description are publicly visible, attributable, and reviewable. There are no silent edits and no ambiguity about how the Foundation articulates
+the meaning of its visual identity.
 
 ### 2. Historical integrity
 
@@ -38,8 +39,8 @@ As a foundation committed to open, shared digital infrastructure for the Church,
 
 ## Purpose of this document
 
-A logo is more than a graphic: it is a condensed expression of an organization's identity, mission, and values.
-The Catholic Digital Commons Foundation's logo carries layered theological and institutional meaning that deserves careful articulation.
+A logo is more than a graphic: it is a condensed expression of an organization's identity, mission, and values. The Catholic Digital Commons Foundation's logo carries layered
+theological and institutional meaning that deserves careful articulation.
 
 This document serves several purposes:
 
@@ -51,14 +52,35 @@ This document serves several purposes:
 
 ## Authority of the text
 
-The content of [`CDCF Logo Symbolism.md`](./CDCF%20Logo%20Symbolism.md) constitutes the **official symbolic description** of the Catholic Digital Commons Foundation logo,
-subject to adoption and revision according to the procedures defined in the Foundation's governance documents.
+The content of [`CDCF Logo Symbolism.md`](./CDCF%20Logo%20Symbolism.md) constitutes the **official symbolic description** of the Catholic Digital Commons Foundation logo, subject
+to adoption and revision according to the procedures defined in the Foundation's governance documents.
 
 The Git history records _how_ the text has evolved; the Foundation's governance procedures define _when_ changes take effect.
 
 ---
 
+## Local development
+
+After cloning the repository, install the Node dev-dependencies:
+
+```sh
+npm install
+```
+
+### Available build scripts
+
+| Command                         | Output                                                                                        |
+| ------------------------------- | --------------------------------------------------------------------------------------------- |
+| `npm run build:html`            | HTML fragment in `dist/logo-symbolism.html`                                                   |
+| `npm run build:html:standalone` | Self-contained HTML (with embedded fonts and styles) in `dist/logo-symbolism-standalone.html` |
+| `npm run build:pdf`             | PDF in `dist/logo-symbolism.pdf` (built from the standalone HTML)                             |
+
+This requires [Pandoc](https://pandoc.org/) as a **system dependency** (not installed via npm). Install it first — for example `sudo apt install pandoc` on Debian/Ubuntu,
+`brew install pandoc` on macOS, or see the [Pandoc installation docs](https://pandoc.org/installing.html).
+
+---
+
 ## License and reuse
 
-This repository contains identity documents of the Catholic Digital Commons Foundation.
-Reuse or adaptation for other organizations should respect applicable legal and canonical requirements.
+This repository contains identity documents of the Catholic Digital Commons Foundation. Reuse or adaptation for other organizations should respect applicable legal and canonical
+requirements.

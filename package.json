@@ -1,0 +1,27 @@
+{
+  "name": "foundation-logo",
+  "private": true,
+  "description": "Official logo symbolism of the Catholic Digital Commons Foundation",
+  "scripts": {
+    "lint:md": "markdownlint-cli2 \"**/*.md\" \"#**/node_modules\" \"#.yarn\"",
+    "lint:md:fix": "markdownlint-cli2 --fix \"**/*.md\" \"#**/node_modules\" \"#.yarn\"",
+    "format:md": "prettier --prose-wrap always --print-width 180 --write \"**/*.md\" \"!**/node_modules/**\"",
+    "build:html": "mkdir -p dist && pandoc 'CDCF Logo Symbolism.md' --wrap=none -f markdown -t html5 -o dist/logo-symbolism.html",
+    "build:html:standalone": "mkdir -p dist && pandoc 'CDCF Logo Symbolism.md' --wrap=none --standalone --embed-resources --css scripts/logo-symbolism-print.css -f markdown -t html5 -o dist/logo-symbolism-standalone.html",
+    "build:pdf": "pagedjs-cli --browserArgs='--no-sandbox' dist/logo-symbolism-standalone.html -o dist/logo-symbolism.pdf",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.md": [
+      "prettier --prose-wrap always --print-width 180 --write",
+      "markdownlint-cli2"
+    ]
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.1",
+    "markdownlint-cli2": "^0.17.2",
+    "pagedjs-cli": "^0.4.3",
+    "prettier": "^3.5.3"
+  }
+}
