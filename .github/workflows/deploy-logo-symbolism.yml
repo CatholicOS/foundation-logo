@@ -24,6 +24,54 @@ jobs:
       - name: Convert Markdown to HTML fragment
         run: pandoc 'CDCF Logo Symbolism.md' --wrap=none -f markdown -t html5 -o logo-symbolism.html
 
+      - name: Upload images to WordPress
+        id: upload-images
+        env:
+          WP_REST_URL: ${{ secrets.WP_REST_URL }}
+          WP_APP_USERNAME: ${{ secrets.WP_APP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+        run: |
+          for SVG in images/*.svg; do
+            FILENAME=$(basename "$SVG")
+            SLUG="${FILENAME%.svg}"
+
+            # Check if the media already exists
+            EXISTING=$(curl -s \
+              -u "$WP_APP_USERNAME:$WP_APP_PASSWORD" \
+              "$WP_REST_URL/wp/v2/media?slug=$SLUG")
+            EXISTING_ID=$(echo "$EXISTING" | jq -r '.[0].id // empty')
+
+            if [ -n "$EXISTING_ID" ] && [ "$EXISTING_ID" != "null" ]; then
+              # Update existing media
+              echo "Updating existing media '$FILENAME' (ID: $EXISTING_ID)..."
+              RESPONSE=$(curl -s -f -X POST \
+                -u "$WP_APP_USERNAME:$WP_APP_PASSWORD" \
+                -H "Content-Disposition: attachment; filename=$FILENAME" \
+                -H "Content-Type: image/svg+xml" \
+                --data-binary "@$SVG" \
+                "$WP_REST_URL/wp/v2/media/$EXISTING_ID")
+            else
+              # Upload new media
+              echo "Uploading '$FILENAME'..."
+              RESPONSE=$(curl -s -f -X POST \
+                -u "$WP_APP_USERNAME:$WP_APP_PASSWORD" \
+                -H "Content-Disposition: attachment; filename=$FILENAME" \
+                -H "Content-Type: image/svg+xml" \
+                --data-binary "@$SVG" \
+                "$WP_REST_URL/wp/v2/media")
+            fi
+
+            WP_URL=$(echo "$RESPONSE" | jq -r '.source_url // empty')
+            if [ -n "$WP_URL" ]; then
+              echo "  ✓ $FILENAME → $WP_URL"
+              # Replace the relative path in the HTML with the WordPress URL
+              sed -i "s|images/$FILENAME|$WP_URL|g" logo-symbolism.html
+            else
+              echo "  ✗ $FILENAME upload failed"
+              echo "  Response: $RESPONSE"
+            fi
+          done
+
       - name: Deploy to WordPress
         id: deploy
         env:
