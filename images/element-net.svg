@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 475 475">
+  <defs>
+    <style>
+      .rope {
+        fill: none;
+        stroke: #9a8432;
+        stroke-miterlimit: 10;
+        stroke-width: 5px;
+      }
+      .knot {
+        fill: #9a8432;
+      }
+    </style>
+  </defs>
+  <circle cx="237.5" cy="237.5" r="237.5" fill="#213463"/>
+  <g id="net">
+    <g id="ropes">
+      <path class="rope" d="M261.14,451.13c-125.2-54.45-203.35-125.38-238.55-207.25"/>
+      <path class="rope" d="M105.23,405.86c117.04-38.62,294.89-154.07,338.07-230.78"/>
+      <path class="rope" d="M319.82,435.76c-76.28,1.17-281.81-206.11-280.96-280.87"/>
+      <path class="rope" d="M37.91,320.76c94.73-3.34,280.74-91.99,374.48-208.71"/>
+      <path class="rope" d="M377.32,401.04c-75.07-9.69-292.96-233.81-299.82-308.07"/>
+      <path class="rope" d="M333.86,46.01C296.71,38.97,34.51,227.33,24.02,240.78"/>
+      <path class="rope" d="M132.12,53.17c99.39,50.94,326.67,204.17,320.32,193.83"/>
+      <path class="rope" d="M153.49,39.53c-121.08,59.87-127.25,333.9-9.24,391.75"/>
+      <path class="rope" d="M320.53,38.87c116.09,64.75,119.16,334.87-4.98,399.23"/>
+      <path class="rope" d="M245.5,22.5c144.33,37.44,141.7,388.02,15.64,428.63"/>
+      <path class="rope" d="M229.5,22.5c-144.77,35.29-142,366.96-22.38,428.25"/>
+      <path class="rope" d="M207.12,450.75c46.74-3.07,194.45-117.81,245.33-208.8"/>
+    </g>
+    <circle class="rope" cx="237.5" cy="237.5" r="215"/>
+    <g id="knots">
+      <circle class="knot" cx="399.38" cy="312.26" r="7.5"/>
+      <circle class="knot" cx="391.88" cy="136.03" r="7.5"/>
+      <circle class="knot" cx="68.12" cy="317.43" r="7.5"/>
+      <circle class="knot" cx="328.12" cy="379.27" r="7.5"/>
+      <circle class="knot" cx="196.56" cy="365.38" r="7.5"/>
+      <circle class="knot" cx="272.52" cy="420.49" r="7.5"/>
+      <circle class="knot" cx="124.63" cy="300.34" r="7.5"/>
+      <circle class="knot" cx="60.3" cy="212.83" r="7.5"/>
+      <circle class="knot" cx="85" cy="117.17" r="7.5"/>
+      <circle class="knot" cx="202.19" cy="269.96" r="7.5"/>
+      <circle class="knot" cx="260.61" cy="329.51" r="7.5"/>
+      <circle class="knot" cx="149.37" cy="388.36" r="7.5"/>
+      <circle class="knot" cx="353.8" cy="267.61" r="7.5"/>
+      <circle class="knot" cx="407.48" cy="219.23" r="7.5"/>
+      <circle class="knot" cx="164.37" cy="69.71" r="7.5"/>
+      <circle class="knot" cx="121.57" cy="169.88" r="7.5"/>
+      <circle class="knot" cx="298.89" cy="57.5" r="7.5"/>
+    </g>
+  </g>
+</svg>

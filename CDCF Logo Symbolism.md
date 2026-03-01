@@ -1,5 +1,7 @@
 # Symbolism of the CDCF Logo
 
+<img src="images/cdcf-logo.svg" alt="CDCF Logo" width="240" style="display:block;margin:0 auto 1.5em;" />
+
 ## The central vision: _Christus Rex_
 
 The foundational concept of the Catholic Digital Commons Foundation logo is the enduring sovereignty of Christ, visually expressed by the **Cross superimposed upon a Globe**. This
@@ -18,11 +20,15 @@ the Cross became the standard under which Christianity advanced into the global 
 
 ### 1. The Cross
 
+<img src="images/element-cross.svg" alt="The Cross" width="160" style="display:block;margin:0 auto 1em;" />
+
 A bold, white Latin cross occupies the center of the emblem. It is the primary focal point and the element from which the rest of the composition derives its meaning.
 
 The cross is rendered with clean, straight edges and no serifs—simple and unadorned, reflecting the clarity and directness of the Gospel message.
 
 ### 2. The Globe
+
+<img src="images/element-globe.svg" alt="The Globe" width="160" style="display:block;margin:0 auto 1em;" />
 
 The globe represents the totality of the world in its geographical and temporal fullness. By crowning it with the cross, the logo declares that Christ's Lordship is the ultimate
 reality and the central principle by which all things are ordered.
@@ -31,6 +37,8 @@ The globe also underscores the **international character** of the CDCF, conveyin
 vision, and mission.
 
 ### 3. The Net
+
+<img src="images/element-net.svg" alt="The Net" width="160" style="display:block;margin:0 auto 1em;" />
 
 Overlaid upon the globe is a network of intersecting arcs and lines, with nodes at their intersections. This net carries a rich, threefold symbolic meaning:
 
