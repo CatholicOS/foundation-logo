@@ -17,12 +17,40 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Install pandoc
         uses: pandoc/actions/setup@v1
 
       - name: Convert Markdown to HTML fragment
         run: pandoc 'CDCF Logo Symbolism.md' --wrap=none -f markdown -t html5 -o logo-symbolism.html
+
+      - name: Check for image changes
+        id: check-images
+        run: |
+          # For tag triggers, compare against the previous tag; for manual triggers, compare against HEAD~1
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            # Find the previous tag
+            PREV_TAG=$(git tag --sort=-creatordate | head -2 | tail -1)
+            if [ -n "$PREV_TAG" ] && [ "$PREV_TAG" != "$GITHUB_REF_NAME" ]; then
+              DIFF_BASE="$PREV_TAG"
+            else
+              DIFF_BASE="HEAD~1"
+            fi
+          else
+            DIFF_BASE="HEAD~1"
+          fi
+
+          CHANGED=$(git diff --name-only "$DIFF_BASE" HEAD -- images/ 2>/dev/null || echo "images/")
+          if [ -n "$CHANGED" ]; then
+            echo "Images changed since $DIFF_BASE:"
+            echo "$CHANGED"
+            echo "images_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No image changes since $DIFF_BASE."
+            echo "images_changed=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Upload images to WordPress
         id: upload-images
@@ -31,25 +59,37 @@ jobs:
           WP_APP_USERNAME: ${{ secrets.WP_APP_USERNAME }}
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
         run: |
+          IMAGES_CHANGED="${{ steps.check-images.outputs.images_changed }}"
+          NEW_MEDIA_IDS=""
+
           for SVG in images/*.svg; do
             FILENAME=$(basename "$SVG")
             SLUG="${FILENAME%.svg}"
 
-            # Check if the media already exists
+            # Check if the media already exists in WordPress
             EXISTING=$(curl -s \
               -u "$WP_APP_USERNAME:$WP_APP_PASSWORD" \
               "$WP_REST_URL/wp/v2/media?slug=$SLUG")
             EXISTING_ID=$(echo "$EXISTING" | jq -r '.[0].id // empty')
+            EXISTING_URL=$(echo "$EXISTING" | jq -r '.[0].source_url // empty')
 
             if [ -n "$EXISTING_ID" ] && [ "$EXISTING_ID" != "null" ]; then
-              # Update existing media
-              echo "Updating existing media '$FILENAME' (ID: $EXISTING_ID)..."
-              RESPONSE=$(curl -s -f -X POST \
-                -u "$WP_APP_USERNAME:$WP_APP_PASSWORD" \
-                -H "Content-Disposition: attachment; filename=$FILENAME" \
-                -H "Content-Type: image/svg+xml" \
-                --data-binary "@$SVG" \
-                "$WP_REST_URL/wp/v2/media/$EXISTING_ID")
+              if [ "$IMAGES_CHANGED" = "true" ]; then
+                # Re-upload changed media
+                echo "Updating existing media '$FILENAME' (ID: $EXISTING_ID)..."
+                RESPONSE=$(curl -s -f -X POST \
+                  -u "$WP_APP_USERNAME:$WP_APP_PASSWORD" \
+                  -H "Content-Disposition: attachment; filename=$FILENAME" \
+                  -H "Content-Type: image/svg+xml" \
+                  --data-binary "@$SVG" \
+                  "$WP_REST_URL/wp/v2/media/$EXISTING_ID")
+                WP_URL=$(echo "$RESPONSE" | jq -r '.source_url // empty')
+                echo "  ✓ $FILENAME updated → $WP_URL"
+              else
+                # No changes — reuse existing URL
+                WP_URL="$EXISTING_URL"
+                echo "  ⏭ $FILENAME unchanged — using existing URL: $WP_URL"
+              fi
             else
               # Upload new media
               echo "Uploading '$FILENAME'..."
@@ -59,18 +99,56 @@ jobs:
                 -H "Content-Type: image/svg+xml" \
                 --data-binary "@$SVG" \
                 "$WP_REST_URL/wp/v2/media")
+              WP_URL=$(echo "$RESPONSE" | jq -r '.source_url // empty')
+              MEDIA_ID=$(echo "$RESPONSE" | jq -r '.id // empty')
+              echo "  ✓ $FILENAME uploaded → $WP_URL (ID: $MEDIA_ID)"
+              # Only newly uploaded media needs translation
+              NEW_MEDIA_IDS="$NEW_MEDIA_IDS $MEDIA_ID"
             fi
 
-            WP_URL=$(echo "$RESPONSE" | jq -r '.source_url // empty')
+            # Replace the relative path in the HTML with the WordPress URL
             if [ -n "$WP_URL" ]; then
-              echo "  ✓ $FILENAME → $WP_URL"
-              # Replace the relative path in the HTML with the WordPress URL
               sed -i "s|images/$FILENAME|$WP_URL|g" logo-symbolism.html
             else
-              echo "  ✗ $FILENAME upload failed"
-              echo "  Response: $RESPONSE"
+              echo "  ✗ $FILENAME — no URL available"
             fi
           done
+
+          echo "new_media_ids=$NEW_MEDIA_IDS" >> "$GITHUB_OUTPUT"
+
+      - name: Translate new images to all languages
+        if: steps.upload-images.outputs.new_media_ids != ''
+        env:
+          WP_REST_URL: ${{ secrets.WP_REST_URL }}
+          WP_APP_USERNAME: ${{ secrets.WP_APP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+        run: |
+          NEW_MEDIA_IDS="${{ steps.upload-images.outputs.new_media_ids }}"
+          TARGET_LANGS=("it" "es" "fr" "pt" "de")
+
+          for MEDIA_ID in $NEW_MEDIA_IDS; do
+            echo "Translating media ID $MEDIA_ID..."
+            for LANG in "${TARGET_LANGS[@]}"; do
+              RESPONSE=$(curl -s -f -X POST \
+                -u "$WP_APP_USERNAME:$WP_APP_PASSWORD" \
+                -H "Content-Type: application/json" \
+                -d "{\"source_id\": ${MEDIA_ID}, \"target_lang\": \"${LANG}\"}" \
+                "$WP_REST_URL/cdcf/v1/translate")
+
+              TRANSLATED_ID=$(echo "$RESPONSE" | jq -r '.post_id // empty')
+              MESSAGE=$(echo "$RESPONSE" | jq -r '.message // empty')
+
+              if [ -n "$TRANSLATED_ID" ]; then
+                echo "  ✓ ${LANG}: media ID ${TRANSLATED_ID} — ${MESSAGE}"
+              else
+                echo "  ✗ ${LANG}: translation failed"
+                echo "  Response: $RESPONSE"
+              fi
+            done
+          done
+
+          echo ""
+          echo "All media translations complete."
 
       - name: Deploy to WordPress
         id: deploy
