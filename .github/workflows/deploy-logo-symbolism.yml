@@ -33,6 +33,19 @@ jobs:
         run: |
           HTML_CONTENT=$(cat logo-symbolism.html)
 
+          # Look up the "About" page ID to use as parent
+          ABOUT_PAGE=$(curl -s \
+            -u "$WP_APP_USERNAME:$WP_APP_PASSWORD" \
+            "$WP_REST_URL/wp/v2/pages?slug=about&status=publish")
+          PARENT_ID=$(echo "$ABOUT_PAGE" | jq -r '.[0].id // empty')
+
+          if [ -z "$PARENT_ID" ] || [ "$PARENT_ID" = "null" ]; then
+            echo "Warning: 'About' page not found — publishing without parent."
+            PARENT_ID="0"
+          else
+            echo "Found 'About' page (ID: $PARENT_ID) — setting as parent."
+          fi
+
           # Check if a page with slug "logo-symbolism" already exists
           EXISTING=$(curl -s \
             -u "$WP_APP_USERNAME:$WP_APP_PASSWORD" \
@@ -44,7 +57,8 @@ jobs:
             --arg title "Logo Symbolism" \
             --arg slug "logo-symbolism" \
             --arg content "$HTML_CONTENT" \
-            '{title: $title, slug: $slug, content: $content, status: "publish"}')
+            --argjson parent "$PARENT_ID" \
+            '{title: $title, slug: $slug, content: $content, parent: $parent, status: "publish"}')
 
           if [ -n "$PAGE_ID" ] && [ "$PAGE_ID" != "null" ]; then
             echo "Updating existing page (ID: $PAGE_ID)..."
@@ -65,7 +79,38 @@ jobs:
 
           echo "page_id=$PAGE_ID" >> "$GITHUB_OUTPUT"
           echo ""
-          echo "Deployed logo symbolism to WordPress (page ID: $PAGE_ID)."
+          echo "Deployed logo symbolism to WordPress (page ID: $PAGE_ID, parent: $PARENT_ID)."
+
+      - name: Translate to all languages
+        env:
+          WP_REST_URL: ${{ secrets.WP_REST_URL }}
+          WP_APP_USERNAME: ${{ secrets.WP_APP_USERNAME }}
+          WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
+        run: |
+          PAGE_ID="${{ steps.deploy.outputs.page_id }}"
+          TARGET_LANGS=("it" "es" "fr" "pt" "de")
+
+          for LANG in "${TARGET_LANGS[@]}"; do
+            echo "Translating logo symbolism to ${LANG}..."
+            RESPONSE=$(curl -s -f -X POST \
+              -u "$WP_APP_USERNAME:$WP_APP_PASSWORD" \
+              -H "Content-Type: application/json" \
+              -d "{\"source_id\": ${PAGE_ID}, \"target_lang\": \"${LANG}\"}" \
+              "$WP_REST_URL/cdcf/v1/translate")
+
+            TRANSLATED_ID=$(echo "$RESPONSE" | jq -r '.post_id // empty')
+            MESSAGE=$(echo "$RESPONSE" | jq -r '.message // empty')
+
+            if [ -n "$TRANSLATED_ID" ]; then
+              echo "  ✓ ${LANG}: post ID ${TRANSLATED_ID} — ${MESSAGE}"
+            else
+              echo "  ✗ ${LANG}: translation failed"
+              echo "  Response: $RESPONSE"
+            fi
+          done
+
+          echo ""
+          echo "All translations complete."
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
