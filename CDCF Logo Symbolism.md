@@ -6,6 +6,8 @@ The foundational concept of the Catholic Digital Commons Foundation logo is the 
 
 The **Cross of Christ** is the supreme symbol of God's sacrificial love and the instrument of humanity's redemption. Its placement over the globe signifies that Christ's Kingship is not confined to a single nation, people, or era, but is universal and absolute. The authority of Christ, established through His death and resurrection, extends over all creation, all of history, and all of humanity.
 
+This image also recalls the vision of Emperor Constantine before the Battle of the Milvian Bridge in 312 AD, when he saw the Cross in the sky with the words *"In hoc signo vinces"*—"In this sign you shall conquer." That vision marked a turning point in history: Constantine's subsequent embrace of Christianity opened the way for the faith to spread freely throughout the Roman Empire and, from there, to the entire world. The cross over the globe thus evokes not only Christ's eternal Kingship but also the historical moment when the Cross became the standard under which Christianity advanced into the global space.
+
 ## The three elements
 
 ### 1. The Cross
