@@ -268,8 +268,13 @@ jobs:
             else
               MAJOR=$(echo "$LATEST_TAG" | sed 's/^v//' | cut -d. -f1)
               MINOR=$(echo "$LATEST_TAG" | sed 's/^v//' | cut -d. -f2)
-              NEW_MINOR=$((MINOR + 1))
-              TAG="v${MAJOR}.${NEW_MINOR}"
+              if [ "$MINOR" -ge 9 ]; then
+                NEW_MAJOR=$((MAJOR + 1))
+                TAG="v${NEW_MAJOR}.0"
+              else
+                NEW_MINOR=$((MINOR + 1))
+                TAG="v${MAJOR}.${NEW_MINOR}"
+              fi
               echo "Latest tag: $LATEST_TAG → bumping to $TAG"
             fi
 
