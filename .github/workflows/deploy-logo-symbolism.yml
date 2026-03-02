@@ -261,6 +261,8 @@ jobs:
 
       - name: Determine release version
         id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
             # Triggered by a tag push — use the tag as-is
@@ -285,9 +287,10 @@ jobs:
               echo "Latest tag: $LATEST_TAG → bumping to $TAG"
             fi
 
-            # Create and push the new tag
-            git tag -a "$TAG" -m "Logo Symbolism $TAG"
-            git push origin "$TAG"
+            # Create and push the new tag via GitHub API (no git identity needed)
+            gh api repos/${{ github.repository }}/git/refs \
+              -f ref="refs/tags/$TAG" \
+              -f sha="$(git rev-parse HEAD)"
           fi
 
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
