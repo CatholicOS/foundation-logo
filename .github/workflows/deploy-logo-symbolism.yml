@@ -252,11 +252,39 @@ jobs:
           npm run build:html:standalone
           npm run build:pdf
 
+      - name: Determine release version
+        id: version
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then
+            # Triggered by a tag push — use the tag as-is
+            TAG="${GITHUB_REF_NAME}"
+            echo "Using existing tag: $TAG"
+          else
+            # Triggered manually — auto-bump minor version
+            LATEST_TAG=$(git tag --list 'v*' --sort=-version:refname | head -1)
+            if [ -z "$LATEST_TAG" ]; then
+              TAG="v1.0"
+              echo "No existing tags found — starting at $TAG"
+            else
+              MAJOR=$(echo "$LATEST_TAG" | sed 's/^v//' | cut -d. -f1)
+              MINOR=$(echo "$LATEST_TAG" | sed 's/^v//' | cut -d. -f2)
+              NEW_MINOR=$((MINOR + 1))
+              TAG="v${MAJOR}.${NEW_MINOR}"
+              echo "Latest tag: $LATEST_TAG → bumping to $TAG"
+            fi
+
+            # Create and push the new tag
+            git tag -a "$TAG" -m "Logo Symbolism $TAG"
+            git push origin "$TAG"
+          fi
+
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+
       - name: Create GitHub release with PDF and standalone HTML
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          TAG="${GITHUB_REF_NAME}"
+          TAG="${{ steps.version.outputs.tag }}"
           gh release create "$TAG" \
             --title "Logo Symbolism $TAG" \
             --notes "Official logo symbolism of the Catholic Digital Commons Foundation, $TAG." \
