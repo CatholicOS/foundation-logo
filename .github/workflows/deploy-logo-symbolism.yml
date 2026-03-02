@@ -28,12 +28,11 @@ jobs:
           pandoc 'CDCF Logo Symbolism.md' --wrap=none -f markdown -t html5 -o logo-symbolism.html
           pandoc symbolism-of-24.md --wrap=none -f markdown -t html5 -o symbolism-of-24.html
 
-      - name: Check for image changes
-        id: check-images
+      - name: Detect content changes
+        id: changes
         run: |
           # For tag triggers, compare against the previous tag; for manual triggers, compare against HEAD~1
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            # Find the previous tag
             PREV_TAG=$(git tag --sort=-creatordate | head -2 | tail -1)
             if [ -n "$PREV_TAG" ] && [ "$PREV_TAG" != "$GITHUB_REF_NAME" ]; then
               DIFF_BASE="$PREV_TAG"
@@ -44,14 +43,34 @@ jobs:
             DIFF_BASE="HEAD~1"
           fi
 
-          CHANGED=$(git diff --name-only "$DIFF_BASE" HEAD -- images/ 2>/dev/null || echo "images/")
-          if [ -n "$CHANGED" ]; then
-            echo "Images changed since $DIFF_BASE:"
-            echo "$CHANGED"
+          echo "Comparing against: $DIFF_BASE"
+          CHANGED=$(git diff --name-only "$DIFF_BASE" HEAD 2>/dev/null || echo "FIRST_RUN")
+
+          # Images
+          if echo "$CHANGED" | grep -q '^images/'; then
             echo "images_changed=true" >> "$GITHUB_OUTPUT"
+            echo "  images/ changed"
           else
-            echo "No image changes since $DIFF_BASE."
             echo "images_changed=false" >> "$GITHUB_OUTPUT"
+            echo "  images/ unchanged"
+          fi
+
+          # Logo symbolism page
+          if echo "$CHANGED" | grep -q 'CDCF Logo Symbolism.md'; then
+            echo "page_changed=true" >> "$GITHUB_OUTPUT"
+            echo "  CDCF Logo Symbolism.md changed"
+          else
+            echo "page_changed=false" >> "$GITHUB_OUTPUT"
+            echo "  CDCF Logo Symbolism.md unchanged"
+          fi
+
+          # Explanation post
+          if echo "$CHANGED" | grep -q 'symbolism-of-24.md'; then
+            echo "explanation_changed=true" >> "$GITHUB_OUTPUT"
+            echo "  symbolism-of-24.md changed"
+          else
+            echo "explanation_changed=false" >> "$GITHUB_OUTPUT"
+            echo "  symbolism-of-24.md unchanged"
           fi
 
       - name: Upload images to WordPress
@@ -61,7 +80,7 @@ jobs:
           WP_APP_USERNAME: ${{ secrets.WP_APP_USERNAME }}
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
         run: |
-          IMAGES_CHANGED="${{ steps.check-images.outputs.images_changed }}"
+          IMAGES_CHANGED="${{ steps.changes.outputs.images_changed }}"
           NEW_MEDIA_IDS=""
 
           for SVG in images/*.svg; do
@@ -153,6 +172,7 @@ jobs:
           echo "All media translations complete."
 
       - name: Deploy to WordPress
+        if: steps.changes.outputs.page_changed == 'true' || steps.changes.outputs.images_changed == 'true'
         id: deploy
         env:
           WP_REST_URL: ${{ secrets.WP_REST_URL }}
@@ -210,6 +230,7 @@ jobs:
           echo "Deployed logo symbolism to WordPress (page ID: $PAGE_ID, parent: $PARENT_ID)."
 
       - name: Translate to all languages
+        if: steps.deploy.outputs.page_id != ''
         env:
           WP_REST_URL: ${{ secrets.WP_REST_URL }}
           WP_APP_USERNAME: ${{ secrets.WP_APP_USERNAME }}
@@ -241,6 +262,7 @@ jobs:
           echo "All translations complete."
 
       - name: Deploy explanation post to WordPress
+        if: steps.changes.outputs.explanation_changed == 'true'
         id: deploy-explanation
         env:
           WP_REST_URL: ${{ secrets.WP_REST_URL }}
