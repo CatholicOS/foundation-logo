@@ -19,10 +19,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '24'
-          cache: 'npm'
 
-      - name: Install dependencies
-        run: npm ci
+      - name: Install linting tools
+        run: npm install --no-save markdownlint-cli2 prettier
 
-      - name: Run markdownlint
-        run: npx markdownlint-cli2 "**/*.md" "#**/node_modules"
+      - name: Lint Markdown
+        run: npm run lint:md
