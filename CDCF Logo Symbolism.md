@@ -71,6 +71,12 @@ The logo employs three colors, each chosen for both visual clarity and symbolic 
 | **Gold / ochre** | Network grid and nodes  | Value, divine light, and connectivity                              |
 | **White**        | Cross                   | Purity, truth, and the light of Christ                             |
 
+## Press kit
+
+Download the official CDCF logo assets — including vector SVG, PNG, and individual element files — as a single archive:
+
+[Download press kit (zip)](https://github.com/CatholicOS/foundation-logo/releases/latest/download/cdcf-logo-press-kit.zip)
+
 ## Technical specification
 
 | Element              | Description                      |

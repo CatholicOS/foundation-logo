@@ -259,6 +259,17 @@ jobs:
           npm run build:html:standalone
           npm run build:pdf
 
+      - name: Install librsvg
+        run: sudo apt-get install -y --no-install-recommends librsvg2-bin
+
+      - name: Build press kit zip
+        run: |
+          mkdir -p dist/press-kit
+          rsvg-convert -w 1024 -h 1024 images/cdcf-logo.svg -o dist/press-kit/cdcf-logo.png
+          cp images/cdcf-logo.svg dist/press-kit/
+          cp images/element-cross.svg images/element-globe.svg images/element-net.svg dist/press-kit/
+          cd dist && zip -r cdcf-logo-press-kit.zip press-kit/
+
       - name: Determine release version
         id: version
         env:
@@ -304,4 +315,5 @@ jobs:
             --title "Logo Symbolism $TAG" \
             --notes "Official logo symbolism of the Catholic Digital Commons Foundation, $TAG." \
             dist/logo-symbolism-standalone.html \
-            dist/logo-symbolism.pdf
+            dist/logo-symbolism.pdf \
+            dist/cdcf-logo-press-kit.zip
