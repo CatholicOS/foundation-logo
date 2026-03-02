@@ -20,14 +20,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install pandoc
-        uses: pandoc/actions/setup@v1
-
-      - name: Convert Markdown to HTML fragments
-        run: |
-          pandoc 'CDCF Logo Symbolism.md' --wrap=none -f markdown -t html5 -o logo-symbolism.html
-          pandoc symbolism-of-24.md --wrap=none -f markdown -t html5 -o symbolism-of-24.html
-
       - name: Detect content changes
         id: changes
         run: |
@@ -73,7 +65,25 @@ jobs:
             echo "  symbolism-of-24.md unchanged"
           fi
 
+          # Combined flag — true when any content file changed
+          if echo "$CHANGED" | grep -qE '^images/|CDCF Logo Symbolism\.md|symbolism-of-24\.md'; then
+            echo "content_changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "content_changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install pandoc
+        if: steps.changes.outputs.content_changed == 'true'
+        uses: pandoc/actions/setup@v1
+
+      - name: Convert Markdown to HTML fragments
+        if: steps.changes.outputs.content_changed == 'true'
+        run: |
+          pandoc 'CDCF Logo Symbolism.md' --wrap=none -f markdown -t html5 -o logo-symbolism.html
+          pandoc symbolism-of-24.md --wrap=none -f markdown -t html5 -o symbolism-of-24.html
+
       - name: Upload images to WordPress
+        if: steps.changes.outputs.page_changed == 'true' || steps.changes.outputs.images_changed == 'true'
         id: upload-images
         env:
           WP_REST_URL: ${{ secrets.WP_REST_URL }}
@@ -332,12 +342,14 @@ jobs:
           done
 
       - name: Setup Node.js
+        if: steps.changes.outputs.page_changed == 'true' || steps.changes.outputs.images_changed == 'true'
         uses: actions/setup-node@v4
         with:
           node-version: '24'
           cache: 'npm'
 
       - name: Cache Puppeteer browsers
+        if: steps.changes.outputs.page_changed == 'true' || steps.changes.outputs.images_changed == 'true'
         uses: actions/cache@v4
         with:
           path: ~/.cache/puppeteer
@@ -345,17 +357,21 @@ jobs:
           restore-keys: puppeteer-${{ runner.os }}-
 
       - name: Install npm dependencies
+        if: steps.changes.outputs.page_changed == 'true' || steps.changes.outputs.images_changed == 'true'
         run: npm ci
 
       - name: Build standalone HTML and PDF
+        if: steps.changes.outputs.page_changed == 'true' || steps.changes.outputs.images_changed == 'true'
         run: |
           npm run build:html:standalone
           npm run build:pdf
 
       - name: Install librsvg
+        if: steps.changes.outputs.images_changed == 'true'
         run: sudo apt-get install -y --no-install-recommends librsvg2-bin
 
       - name: Build press kit zip
+        if: steps.changes.outputs.images_changed == 'true'
         run: |
           mkdir -p dist/press-kit
           rsvg-convert -w 1024 -h 1024 images/cdcf-logo.svg -o dist/press-kit/cdcf-logo.png
@@ -364,6 +380,7 @@ jobs:
           cd dist && zip -r cdcf-logo-press-kit.zip press-kit/
 
       - name: Determine release version
+        if: steps.changes.outputs.content_changed == 'true'
         id: version
         env:
           GH_TOKEN: ${{ github.token }}
@@ -400,13 +417,16 @@ jobs:
           echo "tag=$TAG" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub release with PDF and standalone HTML
+        if: steps.version.outputs.tag != ''
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="${{ steps.version.outputs.tag }}"
+          ASSETS=()
+          [ -f dist/logo-symbolism-standalone.html ] && ASSETS+=(dist/logo-symbolism-standalone.html)
+          [ -f dist/logo-symbolism.pdf ] && ASSETS+=(dist/logo-symbolism.pdf)
+          [ -f dist/cdcf-logo-press-kit.zip ] && ASSETS+=(dist/cdcf-logo-press-kit.zip)
           gh release create "$TAG" \
             --title "Logo Symbolism $TAG" \
             --notes "Official logo symbolism of the Catholic Digital Commons Foundation, $TAG." \
-            dist/logo-symbolism-standalone.html \
-            dist/logo-symbolism.pdf \
-            dist/cdcf-logo-press-kit.zip
+            "${ASSETS[@]}"
