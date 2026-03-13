@@ -5,16 +5,16 @@
 ## The central vision: _Christus Rex_
 
 The foundational concept of the Catholic Digital Commons Foundation logo is the enduring sovereignty of Christ, visually expressed by the **Cross superimposed upon a Globe**. This
-core image declares a single theme: **Christ is King**—His dominion is universal, and His mission extends to the whole world.
+core image declares a single theme: **Christ is King** — His dominion is universal, and His mission extends to the whole world.
 
 The **Cross of Christ** is the supreme symbol of God's sacrificial love and the instrument of humanity's redemption. Its placement over the globe signifies that Christ's Kingship
 is not confined to a single nation, people, or era, but is universal and absolute. The authority of Christ, established through His death and resurrection, extends over all
 creation, all of history, and all of humanity.
 
-This image also recalls the vision of Emperor Constantine before the Battle of the Milvian Bridge in 312 AD, when he saw the Cross in the sky with the words _"In hoc signo
-vinces"_—"In this sign you shall conquer." That vision marked a turning point in history: Constantine's subsequent embrace of Christianity opened the way for the faith to spread
-freely throughout the Roman Empire and, from there, to the entire world. The cross over the globe thus evokes not only Christ's eternal Kingship but also the historical moment when
-the Cross became the standard under which Christianity advanced into the global space.
+This image also recalls the vision of Emperor Constantine before the Battle of the Milvian Bridge in 312 AD, when he saw the Cross in the sky with the words _"In hoc signo vinces"_
+— "In this sign you shall conquer." That vision marked a turning point in history: Constantine's subsequent embrace of Christianity opened the way for the faith to spread freely
+throughout the Roman Empire and, from there, to the entire world. The cross over the globe thus evokes not only Christ's eternal Kingship but also the historical moment when the
+Cross became the standard under which Christianity advanced into the global space.
 
 ## The three elements
 
@@ -45,12 +45,17 @@ Overlaid upon the globe is a network of intersecting arcs and lines, with nodes 
 - **The biblical mandate of evangelization.** The net is a direct reference to Christ's call to His disciples: _"I will make you fishers of men"_ (Matthew 4:19). It represents the
   Church's perennial mission to cast the net of the Gospel across the whole world.
 
-- **Global digital connectivity.** In a contemporary context, the net represents the **internet**—the digital infrastructure that connects humanity across every boundary. This
+- **Global digital connectivity.** In a contemporary context, the net represents the **internet** — the digital infrastructure that connects humanity across every boundary. This
   acknowledges the central role of modern communication technology in facilitating the Church's outreach and the Foundation's own work.
 
 - **Artificial intelligence and neural networks.** The interwoven structure of nodes and connections evokes the architecture of **neural networks**, the computational foundation of
   modern artificial intelligence. This element signals the Foundation's commitment to engaging thoughtfully and ethically with emerging technologies as instruments of mission and
   dialogue.
+
+> We must lay one brick at a time, take one step at a time... But we can beg for an increase of love in our hearts that will vitalize and transform all our individual actions, and
+> know that God will take care of them and multiply them, as Jesus multiplied the loaves and fishes.
+>
+> \-- Dorothy Day, _Loaves and Fishes_ (1963)
 
 ## Visual description
 
