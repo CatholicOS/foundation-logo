@@ -80,6 +80,25 @@ This requires [Pandoc](https://pandoc.org/) as a **system dependency** (not inst
 
 ---
 
+## Releases
+
+Each version of the logo symbolism is published as a [GitHub Release](../../releases) with a standalone HTML file, a PDF, and a press kit zip.
+
+Releases are created automatically by the CI workflow when a version tag is pushed. **Do not create a GitHub Release manually** — create only the tag, and let the workflow do the
+rest.
+
+To publish a new release:
+
+```sh
+git tag v1.x
+git push origin v1.x
+```
+
+The workflow will build the artifacts and create the release. If you do create a release manually (e.g. through the GitHub UI), the workflow will detect the existing release and
+upload the built assets to it rather than failing.
+
+---
+
 ## License and reuse
 
 This repository contains identity documents of the Catholic Digital Commons Foundation. Reuse or adaptation for other organizations should respect applicable legal and canonical

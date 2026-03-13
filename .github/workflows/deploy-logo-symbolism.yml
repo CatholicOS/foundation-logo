@@ -13,6 +13,8 @@ jobs:
   deploy:
     name: Convert & publish logo symbolism
     runs-on: ubuntu-latest
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
     steps:
       - name: Checkout repository
@@ -348,23 +350,19 @@ jobs:
           node-version: '24'
           cache: 'npm'
 
-      - name: Cache Puppeteer browsers
-        if: steps.changes.outputs.page_changed == 'true' || steps.changes.outputs.images_changed == 'true'
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/puppeteer
-          key: puppeteer-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
-          restore-keys: puppeteer-${{ runner.os }}-
-
       - name: Install npm dependencies
         if: steps.changes.outputs.page_changed == 'true' || steps.changes.outputs.images_changed == 'true'
         run: npm ci
+        env:
+          PUPPETEER_SKIP_DOWNLOAD: 'true'
 
       - name: Build standalone HTML and PDF
         if: steps.changes.outputs.page_changed == 'true' || steps.changes.outputs.images_changed == 'true'
         run: |
           npm run build:html:standalone
           npm run build:pdf
+        env:
+          PUPPETEER_EXECUTABLE_PATH: /usr/bin/google-chrome-stable
 
       - name: Install librsvg
         if: steps.changes.outputs.images_changed == 'true'
@@ -426,7 +424,12 @@ jobs:
           [ -f dist/logo-symbolism-standalone.html ] && ASSETS+=(dist/logo-symbolism-standalone.html)
           [ -f dist/logo-symbolism.pdf ] && ASSETS+=(dist/logo-symbolism.pdf)
           [ -f dist/cdcf-logo-press-kit.zip ] && ASSETS+=(dist/cdcf-logo-press-kit.zip)
-          gh release create "$TAG" \
-            --title "Logo Symbolism $TAG" \
-            --notes "Official logo symbolism of the Catholic Digital Commons Foundation, $TAG." \
-            "${ASSETS[@]}"
+          if gh release view "$TAG" &>/dev/null; then
+            echo "Release $TAG already exists — uploading assets to existing release."
+            gh release upload "$TAG" "${ASSETS[@]}" --clobber
+          else
+            gh release create "$TAG" \
+              --title "Logo Symbolism $TAG" \
+              --notes "Official logo symbolism of the Catholic Digital Commons Foundation, $TAG." \
+              "${ASSETS[@]}"
+          fi
