@@ -88,7 +88,7 @@ jobs:
         if: steps.changes.outputs.page_changed == 'true' || steps.changes.outputs.images_changed == 'true'
         id: upload-images
         env:
-          WP_REST_URL: ${{ secrets.WP_REST_URL }}
+          WP_REST_URL: ${{ vars.WP_REST_URL }}
           WP_APP_USERNAME: ${{ secrets.WP_APP_USERNAME }}
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
         run: |
@@ -152,7 +152,7 @@ jobs:
       - name: Translate new images to all languages
         if: steps.upload-images.outputs.new_media_ids != ''
         env:
-          WP_REST_URL: ${{ secrets.WP_REST_URL }}
+          WP_REST_URL: ${{ vars.WP_REST_URL }}
           WP_APP_USERNAME: ${{ secrets.WP_APP_USERNAME }}
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
         run: |
@@ -187,7 +187,7 @@ jobs:
         if: steps.changes.outputs.page_changed == 'true' || steps.changes.outputs.images_changed == 'true'
         id: deploy
         env:
-          WP_REST_URL: ${{ secrets.WP_REST_URL }}
+          WP_REST_URL: ${{ vars.WP_REST_URL }}
           WP_APP_USERNAME: ${{ secrets.WP_APP_USERNAME }}
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
         run: |
@@ -244,7 +244,7 @@ jobs:
       - name: Translate to all languages
         if: steps.deploy.outputs.page_id != ''
         env:
-          WP_REST_URL: ${{ secrets.WP_REST_URL }}
+          WP_REST_URL: ${{ vars.WP_REST_URL }}
           WP_APP_USERNAME: ${{ secrets.WP_APP_USERNAME }}
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
         run: |
@@ -277,7 +277,7 @@ jobs:
         if: steps.changes.outputs.explanation_changed == 'true'
         id: deploy-explanation
         env:
-          WP_REST_URL: ${{ secrets.WP_REST_URL }}
+          WP_REST_URL: ${{ vars.WP_REST_URL }}
           WP_APP_USERNAME: ${{ secrets.WP_APP_USERNAME }}
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
         run: |
@@ -318,7 +318,7 @@ jobs:
       - name: Translate explanation post
         if: steps.deploy-explanation.outputs.post_id != ''
         env:
-          WP_REST_URL: ${{ secrets.WP_REST_URL }}
+          WP_REST_URL: ${{ vars.WP_REST_URL }}
           WP_APP_USERNAME: ${{ secrets.WP_APP_USERNAME }}
           WP_APP_PASSWORD: ${{ secrets.WP_APP_PASSWORD }}
         run: |
