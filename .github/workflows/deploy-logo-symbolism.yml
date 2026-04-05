@@ -13,12 +13,9 @@ jobs:
   deploy:
     name: Convert & publish logo symbolism
     runs-on: ubuntu-latest
-    env:
-      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
-
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
@@ -76,7 +73,7 @@ jobs:
 
       - name: Install pandoc
         if: steps.changes.outputs.content_changed == 'true'
-        uses: pandoc/actions/setup@v1
+        uses: pandoc/actions/setup@v1.1.1
 
       - name: Convert Markdown to HTML fragments
         if: steps.changes.outputs.content_changed == 'true'
@@ -345,7 +342,7 @@ jobs:
 
       - name: Setup Node.js
         if: steps.changes.outputs.page_changed == 'true' || steps.changes.outputs.images_changed == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '24'
           cache: 'npm'
